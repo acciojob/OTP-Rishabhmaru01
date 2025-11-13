@@ -1,34 +1,40 @@
-//your JS code here. If required.
-const inputs = document.querySelectorAll('.code')
+const inputs = Array.from(document.querySelectorAll('.code'));
 
-inputs[0].focus();
+// Focus first input on page load
+window.addEventListener('load', () => {
+  inputs[0].focus();
+});
 
-//forward typing
-inputs.forEach((input, index)=>{
-	//handle the input event
-	input.addEventListener('input', (e)=>{
-		const value = e.target.value;
+// Helper: move focus safely
+function focusAt(i) {
+  if (i >= 0 && i < inputs.length) inputs[i].focus();
+}
 
-		//only allow one digit
-		if(value.length>1){
-			e.target.value = value.slice(0,1)
-		}
+// Handle input and navigation
+inputs.forEach((input, index) => {
+  input.addEventListener('input', (e) => {
+    const value = e.target.value.replace(/\D/g, ''); // numeric only
+    e.target.value = value;
 
-		if(value.length===1 && index<inputs.length-1){
-			inputs[index+1].focus();
-		}
-	})
+    if (value && index < inputs.length - 1) {
+      focusAt(index + 1);
+    }
+  });
 
-	//handling keydown for backspace
-	input.addEventListener('keydown', (e)=>{
-		if(e.key=== 'Backspace'){
-			if(e.target.value === '' && index>0){
-				e.preventDefault()
-				inputs[index-1].focus();
-				
-			}else{
-				e.target.value="";
-			}
-		}
-	})
-})
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace') {
+      if (input.value) {
+        input.value = '';
+      } else if (index > 0) {
+        inputs[index - 1].value = '';
+        focusAt(index - 1);
+      }
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      focusAt(index - 1);
+    } else if (e.key === 'ArrowRight' && index < inputs.length - 1) {
+      focusAt(index + 1);
+    }
+  });
+
+  input.addEventListener('focus', () => input.select());
+});
